@@ -4,47 +4,49 @@ from core.speaker import speaker
 class Listener:
     def __init__(self):
         self.recognizer = sr.Recognizer()
+        self.setup_microphone()
+    
+    def setup_microphone(self):
         try:
-            self.microphone = sr.Microphone()
-            print("🎤 Microphone initialized")
-        except:
-            print("❌ Microphone not available, using text input")
-            self.microphone = None
-
-    def listen_with_mic(self):
-        """Listen using microphone"""
-        try:
-            with self.microphone as source:
-                print("\n🎙 Listening...")
+            self.mic = sr.Microphone()
+            with self.mic as source:
                 self.recognizer.adjust_for_ambient_noise(source, duration=1)
-                audio = self.recognizer.listen(source, timeout=8, phrase_time_limit=10)
+            print("✅ Microphone ready")
+        except:
+            print("❌ Microphone not available")
+            self.mic = None
+    
+    def listen(self):
+        if not self.mic:
+            return self.text_input()
+        
+        try:
+            with self.mic as source:
+                print("\n🎤 Listening...")
+                audio = self.recognizer.listen(source, timeout=5, phrase_time_limit=8)
             
-            query = self.recognizer.recognize_google(audio, language="en-in")
+            query = self.recognizer.recognize_google(audio, language='en-in')
             print(f"👤 You said: {query}")
             return query.lower()
-        except sr.WaitTimeoutError:
-            speaker.speak("I didn't hear anything. Please try again.")
-            return ""
+        
         except sr.UnknownValueError:
-            speaker.speak("Sorry, I couldn't understand that.")
+            speaker.speak("Sorry, couldn't understand")
+            return ""
+        except sr.RequestError:
+            speaker.speak("Check internet connection")
+            return ""
+        except sr.WaitTimeoutError:
+            speaker.speak("I didn't hear anything")
             return ""
         except Exception as e:
-            print(f"❌ Mic error: {e}")
-            return ""
-
-    def listen_with_text(self):
-        """Fallback: Listen using text input"""
+            print(f"Error: {e}")
+            return self.text_input()
+    
+    def text_input(self):
         try:
-            query = input("\n📝 Type your command: ").strip()
-            return query.lower()
+            query = input("\n📝 Type command: ").strip()
+            return query.lower() if query else ""
         except:
             return ""
 
-    def listen(self):
-        if self.microphone:
-            return self.listen_with_mic()
-        else:
-            return self.listen_with_text()
-
-# Global instance
 listener = Listener()
