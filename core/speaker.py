@@ -1,26 +1,37 @@
 import pyttsx3
+import subprocess
+import platform
 
 class Speaker:
     def __init__(self):
+        self.engine = None
+        self.init_engine()
+    
+    def init_engine(self):
         try:
             self.engine = pyttsx3.init()
-            self.engine.setProperty('rate', 175)
+            self.engine.setProperty('rate', 170)
             self.engine.setProperty('volume', 1.0)
-            print("🔊 Speaker initialized successfully")
-        except Exception as e:
-            print(f"❌ Speaker init error: {e}")
+            print("✅ Speaker initialized")
+        except:
+            print("❌ Pyttsx3 failed, using fallback")
             self.engine = None
-
+    
     def speak(self, text):
         print(f"🤖 Assistant: {text}")
-        if self.engine:
-            try:
+        try:
+            if self.engine:
                 self.engine.say(text)
                 self.engine.runAndWait()
-            except Exception as e:
-                print(f"❌ Speech error: {e}")
-        else:
-            print(f"📝 [TTS]: {text}")
+            else:
+                self.fallback_speak(text)
+        except:
+            self.fallback_speak(text)
+    
+    def fallback_speak(self, text):
+        try:
+            subprocess.run(['termux-tts-speak', text], check=False)
+        except:
+            print(f"💬 {text}")
 
-# Global instance
 speaker = Speaker()
