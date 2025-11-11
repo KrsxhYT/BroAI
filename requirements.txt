@@ -1,5 +1,5 @@
-SpeechRecognition==3.10.0
-pyttsx3==2.90
-wikipedia==1.4.0
+DateTime==4.3
+pytz==2021.1
+zope.interface==5.4.0
 requests==2.31.0
-pygame==2.5.2
+colorama==0.4.6
